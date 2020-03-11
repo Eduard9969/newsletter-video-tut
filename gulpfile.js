@@ -2,7 +2,8 @@ var gulp = require('gulp'),
     sass = require('gulp-sass'),
     inky = require('inky'),
     inlineCss = require('gulp-inline-css'),
-    inlinesource = require('gulp-inline-source');
+    inlinesource = require('gulp-inline-source'),
+    browserSync = require('browser-sync').create();
 
 
 //STYLES
@@ -12,8 +13,8 @@ gulp.task('styles', function () {
     .pipe(gulp.dest('./css'));
 });
 
-//CONVERTE INKY
-gulp.task('inky', ['styles'], function() {
+// //CONVERTE INKY
+gulp.task('inky', function() {
   return gulp.src('./templates/**/*.html')
     .pipe(inlinesource())
     .pipe(inky())
@@ -21,10 +22,19 @@ gulp.task('inky', ['styles'], function() {
         preserveMediaQueries: true,
         removeLinkTags: false
     }))
-    .pipe(gulp.dest('./dist'));
+    .pipe(gulp.dest('./dist'))
+    .pipe(browserSync.stream());
 });
 
 //WATCH
 gulp.task('default',function() {
-    gulp.watch(['./scss/**/*.scss', './templates/**/*.html'],['inky']);
+
+    // Browser-Sync
+    browserSync.init({
+        server: {
+            baseDir: "./dist"
+        }
+    });
+
+    gulp.watch(['./scss/**/*.scss', './templates/**/*.html'], gulp.series('inky'));
 });
